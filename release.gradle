@@ -1,0 +1,12 @@
+task releaseSql(type: Zip) {
+    baseName = rootProject.name
+    appendix = 's'
+    from('s/')
+    include '*.sql'
+    destinationDir = buildDir
+}
+
+task release(dependsOn: releaseSql, type: Copy) {
+    from subprojects.collect({ it.configurations.delivery.artifacts.collect({ it.file }) })
+    into buildDir
+}
