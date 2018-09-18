@@ -1,5 +1,17 @@
+allprojects {
+    configurations {
+        releaseDelivery
+    }
+}
+
+ext {
+    deliveryModules = [
+        ':subprojects:c', ':a'
+    ]
+}
+
 subprojects {
-    apply plugin: 'java'
+    apply plugin: 'java-library'
 
     sourceCompatibility = 1.8
 
@@ -7,21 +19,44 @@ subprojects {
         mavenCentral()
     }
 
-    task projectRelease(type: Zip) {
-        baseName = rootProject.name
-        appendix = project.name
+    ext {
+        moduleName = projects.name
+    }
+    task projectRelease(type: Zip) {}
+    afterEvaluate { project ->
+        projectRelease {
+            onlyIf { deliveryModules.contains(project.path) }
 
-        from(buildDir.path + '/libs') {
-            into 'lib'
+            baseName = rootProject.name
+            appendix = project.name
+
+            into(moduleName) {
+                from("template") {
+                    into "template"
+                    exclude "$moduleName-version.inc"
+                    include "**/*"
+                }
+
+                into("lib") {
+                    from tasks.jar.outputs
+                    from configurations.runtimeClasspath
+                }
+            }
         }
     }
 
-    configurations {
-        delivery
+    dependencies {
+        testCompile group: 'junit', name: 'junit', version: junitVersion
     }
 
     artifacts {
-        delivery projectRelease
+        releaseDelivery projectRelease
+    }
+}
+
+dependencies {
+    subprojects.each { sub ->
+        releaseDelivery project(path: ":${sub.path}", configuration: 'releaseDelivery')
     }
 }
 

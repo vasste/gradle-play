@@ -1,0 +1,6 @@
+ext.moduleName = 'ngaserver'
+
+dependencies {
+    implementation project(":b")
+    implementation project(":subprojects")
+}

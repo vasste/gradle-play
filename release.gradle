@@ -7,6 +7,6 @@ task releaseSql(type: Zip) {
 }
 
 task release(dependsOn: releaseSql, type: Copy) {
-    from subprojects.collect({ it.configurations.delivery.artifacts.collect({ it.file }) })
+    from configurations.releaseDelivery
     into buildDir
 }
